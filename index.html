@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Petition: Jährliches BOON-Gildentreffen</title>
+<meta name="description" content="Unterschreib für ein jährliches Gildentreffen des Budapester Boonorchesters (BOON)!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fbf6ee;--card:#fff;--ink:#1d1b18;--muted:#6f6a62;--line:#e8e0d3;--accent:#7a3fd1;--accent-2:#f2b53a;--ok:#2f8f5b}
+  @media (prefers-color-scheme:dark){:root{--bg:#17150f;--card:#221f18;--ink:#f3eee4;--muted:#a59f93;--line:#38332a;--accent:#a77bf0;--accent-2:#f2b53a;--ok:#4fbf83}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif}
+  .wrap{max-width:680px;margin:0 auto;padding:28px 18px 60px}
+  .stamp{display:inline-block;font:600 12px Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:2px solid var(--accent);padding:4px 10px;border-radius:4px;transform:rotate(-2deg)}
+  h1{font:800 clamp(30px,7vw,46px)/1.08 Fraunces,Georgia,serif;margin:16px 0 12px;letter-spacing:-.01em}
+  .desc{color:var(--muted);white-space:pre-wrap;margin:0 0 22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+  .count{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .count b{font:800 40px Fraunces,Georgia,serif}
+  .count span{color:var(--muted)}
+  .bar{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0 4px}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:99px;transition:width .6s ease}
+  .small{font-size:13px;color:var(--muted)}
+  label{display:block;font-weight:600;font-size:14px;margin:12px 0 6px}
+  input,textarea{width:100%;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+  textarea{resize:vertical;min-height:70px}
+  input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+  button{font:600 16px Inter;border:0;border-radius:10px;padding:13px 18px;cursor:pointer;background:var(--accent);color:#fff;width:100%;margin-top:16px}
+  button:disabled{opacity:.55;cursor:default}
+  button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);width:auto;padding:8px 12px;font-size:14px;margin:0}
+  .signed{color:var(--ok);font-weight:600}
+  .msg{margin-top:10px;font-size:14px;color:var(--muted)}
+  ul{list-style:none;margin:0;padding:0}
+  li{padding:12px 0;border-top:1px solid var(--line)}
+  li:first-child{border-top:0}
+  li .n{font-weight:600}
+  li .c{color:var(--muted);font-size:14px;margin-top:2px}
+  li .t{float:right;font-size:12px;color:var(--muted)}
+  li .x{float:right;margin-left:8px;background:none;border:0;color:var(--muted);width:auto;padding:0 4px;margin-top:0;font-size:14px}
+  h2{font:600 20px Fraunces,Georgia,serif;margin:0 0 8px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .hidden{display:none}
+  .empty{color:var(--muted);font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="stamp">Hochoffizielle Petition</span>
+
+  <h1>Das BOON-Gildentreffen muss jährlich stattfinden!</h1>
+  <p class="desc">Wir, die Unterzeichnenden des Budapester Boonorchesters (BOON), fordern: Das Gildentreffen findet ab sofort jedes Jahr statt. Einmal ist kein Mal – und ein Orchester probt schließlich auch nicht nur einmal.
+
+Trag deinen Namen ein und zeig, dass du nächstes Jahr wieder dabei bist!</p>
+
+  <div class="card">
+    <div class="count"><b id="num">0</b><span id="goalTxt"></span></div>
+    <div class="bar"><i id="fill"></i></div>
+    <div id="pct" class="small"></div>
+  </div>
+
+  <div class="card">
+    <h2>Unterschreiben</h2>
+    <form id="form" autocomplete="off">
+      <label for="name">Dein Name (oder Charaktername)</label>
+      <input id="name" maxlength="60" required placeholder="z. B. Rytlock Brimstone">
+      <label for="comment">Warum unterschreibst du? <span class="small">(optional)</span></label>
+      <input id="comment" maxlength="200" placeholder="Weil ein Jahr ohne Treffen zu lang ist.">
+      <button id="signBtn" type="submit">Petition unterschreiben</button>
+    </form>
+    <div id="formMsg" class="msg"></div>
+  </div>
+
+  <div class="card">
+    <h2>Unterschriften</h2>
+    <ul id="list"><li class="empty">Unterschriften werden geladen…</li></ul>
+  </div>
+</div>
+
+<script>
+// ===== Konfiguration =====
+const SUPABASE_URL = "SUPABASE_URL_HIER";       // z. B. https://abcd1234.supabase.co
+const SUPABASE_KEY = "SUPABASE_ANON_KEY_HIER";  // öffentlicher anon/publishable Key
+const GOAL = 20;
+// =========================
+
+const $ = id => document.getElementById(id);
+const configured = !SUPABASE_URL.includes("_HIER") && !SUPABASE_KEY.includes("_HIER");
+const API = SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/signatures";
+const HEADERS = {apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json"};
+const LS_KEY = "boon-petition-signed";
+let sigs = [];
+
+function ago(ts){
+  const s = Math.max(1, Math.round((Date.now()-ts)/1000));
+  if(s<60) return "gerade eben";
+  const m = Math.round(s/60); if(m<60) return "vor "+m+" Min.";
+  const h = Math.round(m/60); if(h<24) return "vor "+h+" Std.";
+  const d = Math.round(h/24); if(d<30) return "vor "+d+(d===1?" Tag":" Tagen");
+  return new Date(ts).toLocaleDateString("de-DE");
+}
+
+function renderCount(){
+  const n = sigs.length, p = Math.min(100, Math.round(n/GOAL*100));
+  $("num").textContent = n.toLocaleString("de-DE");
+  $("goalTxt").textContent = "von " + GOAL + " Unterschriften";
+  $("fill").style.width = p + "%";
+  $("pct").textContent = n === 0 ? "Unterschreib als Erste*r!" :
+    n >= GOAL ? "🎉 Ziel erreicht! Immer her mit weiteren Stimmen." :
+    p + " % geschafft – noch " + (GOAL-n) + " bis zum Ziel";
+}
+
+function renderList(msg){
+  const ul = $("list"); ul.innerHTML = "";
+  if(msg || !sigs.length){
+    const li = document.createElement("li"); li.className = "empty";
+    li.textContent = msg || "Noch keine Unterschriften.";
+    ul.appendChild(li); return;
+  }
+  for(const s of sigs){
+    const li = document.createElement("li");
+    const t = document.createElement("span"); t.className = "t"; t.textContent = ago(Date.parse(s.created_at));
+    const n = document.createElement("div"); n.className = "n"; n.textContent = s.name;
+    li.append(t, n);
+    if(s.comment){ const c = document.createElement("div"); c.className = "c"; c.textContent = "„" + s.comment + "“"; li.appendChild(c); }
+    ul.appendChild(li);
+  }
+}
+
+function showSigned(name){
+  $("form").classList.add("hidden");
+  $("formMsg").innerHTML = "";
+  const p = document.createElement("span"); p.className = "signed";
+  p.textContent = "✓ Du hast als " + name + " unterschrieben. Danke!";
+  $("formMsg").appendChild(p);
+}
+
+async function load(){
+  try{
+    const r = await fetch(API + "?select=name,comment,created_at&order=created_at.desc", {headers: HEADERS});
+    if(!r.ok) throw new Error(r.status);
+    sigs = await r.json();
+    renderCount(); renderList();
+  }catch(e){ renderList("Unterschriften konnten nicht geladen werden."); }
+}
+
+$("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("name").value.trim(), comment = $("comment").value.trim();
+  if(!name) return;
+  const btn = $("signBtn"); btn.disabled = true; btn.textContent = "Wird gespeichert…";
+  try{
+    const r = await fetch(API, {method: "POST", headers: {...HEADERS, Prefer: "return=minimal"}, body: JSON.stringify({name, comment})});
+    if(!r.ok) throw new Error(r.status);
+    try{ localStorage.setItem(LS_KEY, name); }catch(_){}
+    showSigned(name);
+    load();
+  }catch(err){
+    btn.disabled = false; btn.textContent = "Petition unterschreiben";
+    $("formMsg").textContent = "Unterschrift konnte nicht gespeichert werden. Versuch es gleich nochmal.";
+  }
+});
+
+renderCount();
+if(!configured){
+  renderList("Die Petition wird gerade eingerichtet – schau bald wieder vorbei!");
+  $("signBtn").disabled = true;
+} else {
+  try{ const prev = localStorage.getItem(LS_KEY); if(prev) showSigned(prev); }catch(_){}
+  load();
+  setInterval(load, 30000);
+}
+</script>
+</body>
+</html>
