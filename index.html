@@ -80,15 +80,15 @@ Trag deinen Namen ein und zeig, dass du nächstes Jahr wieder dabei bist!</p>
 
 <script>
 // ===== Konfiguration =====
-const SUPABASE_URL = "SUPABASE_URL_HIER";       // z. B. https://abcd1234.supabase.co
-const SUPABASE_KEY = "SUPABASE_ANON_KEY_HIER";  // öffentlicher anon/publishable Key
+const SUPABASE_URL = "https://qlezjngcdreidwxtijax.supabase.co";       // z. B. https://abcd1234.supabase.co
+const SUPABASE_KEY = "sb_publishable_eC1tvAM0mQKYsg7Tgnbw4A_q5VY86JP";  // öffentlicher anon/publishable Key
 const GOAL = 20;
 // =========================
 
 const $ = id => document.getElementById(id);
 const configured = !SUPABASE_URL.includes("_HIER") && !SUPABASE_KEY.includes("_HIER");
 const API = SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/signatures";
-const HEADERS = {apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json"};
+const HEADERS = {apikey: SUPABASE_KEY, "Content-Type": "application/json"};
 const LS_KEY = "boon-petition-signed";
 let sigs = [];
 
